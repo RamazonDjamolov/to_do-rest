@@ -18,10 +18,11 @@ class FirstApiView(APIView):
         print(data, "my data ")
         return Response(data=data)
 
+
 class ProjectApiView(APIView):
     def get(self, request):
         projects = Project.objects.all()
-        data =[
+        data = [
             {
                 'id': p.id,
                 'name': p.name,
