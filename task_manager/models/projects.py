@@ -12,5 +12,4 @@ class Project(BaseModel):
     class Meta:
         db_table = 'projects'
         ordering = ('-created_at',)
-
-        
+        unique_together = (('name', 'description'),)
