@@ -28,6 +28,11 @@ class TaskDetail(APIView):
 
     def put(self, request, id):
         task = get_object_or_404(Task, id=id)
-        serializer = DetailTaskSerializer(task, data=request.data)
+        serializer = DetailTaskSerializer(instance=task, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        return Response(serializer.data)
+        serializer.save()
+        return Response(request.data)
+
+    def delete(self, request, id):
+        task = get_object_or_404(Task, id=id)
+        task.delete()
