@@ -1,10 +1,11 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-# from accounts.views import UserCreateView
+from task_manager.views import ProjectViewSet
+
 
 router = DefaultRouter()
-# router.register('users', UserCreateView, basename='register')
+router.register('project', ProjectViewSet, basename='projects')
 
 
 urlpatterns = [
