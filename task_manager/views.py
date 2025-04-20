@@ -1,12 +1,7 @@
-from django.contrib.gis.measure import pretty_name
-from django.core.serializers import get_serializer
-from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
-from accounts.models import User
 from accounts.permissions import IsOwner, IsMembers
 from accounts.serializers import UserSerializer
 from .models import Project
