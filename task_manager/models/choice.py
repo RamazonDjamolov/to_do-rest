@@ -6,3 +6,4 @@ class TaskStatus(models.TextChoices):
     IN_PROGRESS = 'in_progress', 'IN_PROGRESS'
     DONE = 'done', 'Done'
     REJECTED = 'rejected', 'Rejected'
+

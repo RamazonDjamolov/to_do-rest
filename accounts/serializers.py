@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from accounts.models import User
+from task_manager.models.choice import TaskStatus
 
 
 class UserCreateSerializer(serializers.ModelSerializer):
@@ -22,8 +23,12 @@ class UserCreateSerializer(serializers.ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
+
+
+
+
+

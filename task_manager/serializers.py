@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from accounts.models import User
 from task_manager.models import Project, Task
+from task_manager.models.choice import TaskStatus
 
 
 class ProjectListModelSerializer(serializers.ModelSerializer):
@@ -27,9 +28,34 @@ class ProjectAddMembers(serializers.ModelSerializer):
         model = Project
         fields = ['members']
 
+
+class ProjectTasksSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ["id", "title", 'status', 'assign_to']
+
+
+#  taskga tegishli
+
+
+class ProjecTaskCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['title', 'status', 'assign_to']
+
+
 class TaskListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ["title", 'description', 'status', 'assign_to', 'project']
+        fields = ['id', 'title', 'status', 'assign_to']
 
 
+class CreateTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['title', 'status', 'assign_to', 'project']
+
+
+class ChoiceSerializer(serializers.Serializer):
+    value = serializers.CharField()
+    label = serializers.CharField()
