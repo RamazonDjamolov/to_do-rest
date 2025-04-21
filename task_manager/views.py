@@ -4,13 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import viewsets
+from yaml import serialize
 
 from accounts.permissions import IsOwner, IsMembers
 from accounts.serializers import UserSerializer
 from .models import Project, Task
 from task_manager.serializers import ProjectListModelSerializer, ProjectCreateModelSerializer, \
     ProjectUpdateModelSerializer, ProjectAddMembers, ProjectTasksSerializer, TaskListSerializer, \
-    ProjecTaskCreateSerializer, CreateTaskSerializer,  ChoiceSerializer
+    ProjecTaskCreateSerializer, CreateTaskSerializer, ChoiceSerializer, ProjectTaskDeatilSerializer
 from .models.choice import TaskStatus
 
 
@@ -35,8 +36,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return ProjectUpdateModelSerializer
         if self.action == 'project_add_members':
             return ProjectAddMembers
-        elif self.action == 'project_create_task':
-            return ProjecTaskCreateSerializer
+
         return self.serializer_class
 
     def get_permissions(self):
@@ -74,21 +74,41 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(user, many=True)
         return Response(serializer.data)
 
+    #  tasklar
+
     @action(methods=['get'], detail=True, permission_classes=[IsAuthenticated, IsOwner | IsMembers])
-    def project_tasks(self, request, pk=None):
+    def project_tasks_list(self, request, pk=None):
         project = self.get_object()
         tasks = Task.objects.all().filter(project=project)
         serializer = ProjectTasksSerializer(tasks, many=True)
         return Response(serializer.data)
 
-    # @action(methods=['post'], detail=True, permission_classes=[IsAuthenticated, IsOwner | IsMembers])
-    # def project_create_task(self, request, pk=None):
-    #     project = self.get_object()
-    #     serializer = ProjecTaskCreateSerializer(data=request.data)
-    #     serializer.project = project
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data)
+    @action(methods=['post'], detail=True, serializer_class=CreateTaskSerializer)
+    def project_create_task(self, request, pk=None):
+        project = self.get_object()
+        serializer = CreateTaskSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(project=project)
+        return Response(serializer.data)
+
+    @action(methods=['get'], detail=True, url_path='task/(?P<task_pk>[^/.]+)', url_name='project-task-detail')
+    def project_task_detail(self, request, pk=None, task_pk=None):
+        project = self.get_object()
+        task = Task.objects.filter(project=project, id=task_pk).first()
+        serializers = ProjectTaskDeatilSerializer(task)
+        return Response(serializers.data)
+
+    @action(methods=['put'], detail=True, url_path='task_update/(?P<task_pk>[^/.]+)', url_name='project-task-put',
+            serializer_class=ProjectTaskDeatilSerializer)
+    def project_task_put(self, request, pk=None, task_pk=None):
+        project = self.get_object()
+        task = Task.objects.filter(project=project, id=task_pk).first()
+        serializers = ProjectTaskDeatilSerializer(data=request.data, instance=task, partial=True)
+        serializers.is_valid(raise_exception=True)
+        serializers.save()
+        return Response(serializers.data)
+
+
 
 
 #
@@ -104,8 +124,6 @@ class TaskViewSet(GenericViewSet, CreateModelMixin, UpdateModelMixin, RetrieveMo
         if self.action == 'create' or self.action == 'update' or self.action == 'partial_update':
             return CreateTaskSerializer
         return self.serializer_class
-
-
 
 
 class TaskStatusViewSet(viewsets.ViewSet):

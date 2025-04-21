@@ -53,9 +53,15 @@ class TaskListSerializer(serializers.ModelSerializer):
 class CreateTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['title', 'status', 'assign_to', 'project']
+        fields = ['title', 'status', 'assign_to']
 
 
 class ChoiceSerializer(serializers.Serializer):
     value = serializers.CharField()
     label = serializers.CharField()
+
+
+class ProjectTaskDeatilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = ['id', 'title', 'description',  'status', 'assign_to']
