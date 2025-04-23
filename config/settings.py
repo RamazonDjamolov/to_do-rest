@@ -175,7 +175,17 @@ SIMPLE_JWT = {
     "SLIDING_TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSlidingSerializer",
 }
 
-
 SWAGGER_SETTINGS = {
     'VALIDATOR_URL': 'http://localhost:8189',
 }
+
+
+#  celery
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+
+CELERY_TASK_TRACK_STARTED = True
+
+CELERY_TASK_TIME_LIMIT = 1800  # tasklarimizi bajarilish limiti 
+
+CELERY_TIMEZONE = 'Asia/Tashkent'

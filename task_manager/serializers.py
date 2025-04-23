@@ -65,3 +65,7 @@ class ProjectTaskDeatilSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'title', 'description',  'status', 'assign_to']
+
+
+class TestSerializer(serializers.Serializer):
+    id = serializers.CharField(max_length=200)

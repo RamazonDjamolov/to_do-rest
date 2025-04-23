@@ -1,6 +1,8 @@
+from config import celery_app
+from celery.result import AsyncResult
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from rest_framework import viewsets
@@ -11,8 +13,9 @@ from accounts.serializers import UserSerializer
 from .models import Project, Task
 from task_manager.serializers import ProjectListModelSerializer, ProjectCreateModelSerializer, \
     ProjectUpdateModelSerializer, ProjectAddMembers, ProjectTasksSerializer, TaskListSerializer, \
-    ProjecTaskCreateSerializer, CreateTaskSerializer, ChoiceSerializer, ProjectTaskDeatilSerializer
+    ProjecTaskCreateSerializer, CreateTaskSerializer, ChoiceSerializer, ProjectTaskDeatilSerializer, TestSerializer
 from .models.choice import TaskStatus
+from .tasks import add
 
 
 # Create your views here.
@@ -108,6 +111,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializers.save()
         return Response(serializers.data)
 
+    @action(methods=['delete'], detail=True, url_path='task_delete/(?P<task_pk>[^/.]+)', url_name='project-task-delete',)
+    def project_task_delete(self, request, pk=None, task_pk=None):
+        project = self.get_object()
+        task = Task.Objrcts.filter(id = task_pk, project=project ).delete()
+        return Response("{message: delete successfully} }")
+
 
 
 
@@ -134,3 +143,23 @@ class TaskStatusViewSet(viewsets.ViewSet):
             many=True
         )
         return Response(serializer.data)
+
+
+class TestCelery(GenericViewSet):
+    permission_classes = [AllowAny]
+    serializer_class = TestSerializer
+
+    @action(methods=['get'], detail=False)
+    def run_task(self, request):
+        task = add.delay(15, 20)
+        return Response({'task_id': task.id})
+
+    @action(methods=['post'], detail=False)
+    def done_task(self, request):
+        serializer = TestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = AsyncResult(serializer.validated_data['id'], app=celery_app)
+        if result.ready():
+            return Response({'result': result.result})
+        else:
+            return Response({'result': "in processing"})
