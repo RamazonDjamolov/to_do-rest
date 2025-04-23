@@ -1,4 +1,4 @@
-from config import celery_app
+from config import celery_app, settings
 from celery.result import AsyncResult
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, UpdateModelMixin, RetrieveModelMixin
@@ -15,7 +15,7 @@ from task_manager.serializers import ProjectListModelSerializer, ProjectCreateMo
     ProjectUpdateModelSerializer, ProjectAddMembers, ProjectTasksSerializer, TaskListSerializer, \
     ProjecTaskCreateSerializer, CreateTaskSerializer, ChoiceSerializer, ProjectTaskDeatilSerializer, TestSerializer
 from .models.choice import TaskStatus
-from .tasks import add
+from .tasks import add, import_export_file
 
 
 # Create your views here.
@@ -111,13 +111,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
         serializers.save()
         return Response(serializers.data)
 
-    @action(methods=['delete'], detail=True, url_path='task_delete/(?P<task_pk>[^/.]+)', url_name='project-task-delete',)
+    @action(methods=['delete'], detail=True, url_path='task_delete/(?P<task_pk>[^/.]+)',
+            url_name='project-task-delete', )
     def project_task_delete(self, request, pk=None, task_pk=None):
         project = self.get_object()
-        task = Task.Objrcts.filter(id = task_pk, project=project ).delete()
+        task = Task.Objrcts.filter(id=task_pk, project=project).delete()
         return Response("{message: delete successfully} }")
-
-
 
 
 #
@@ -161,5 +160,28 @@ class TestCelery(GenericViewSet):
         result = AsyncResult(serializer.validated_data['id'], app=celery_app)
         if result.ready():
             return Response({'result': result.result})
+        else:
+            return Response({'result': "in processing"})
+
+    @action(methods=['get'], detail=False)
+    def run_export_file(self, request):
+        user = self.request.user
+        project = Project.objects.filter(owner=user)
+        project_data = list(project.values())  # QuerySet -> list
+        task = import_export_file.delay(project_data)
+        path = self.request.build_absolute_uri(settings.MEDIA_URL + task.id)
+        return Response({'task_id': task.id})
+
+    @action(methods=['post'], detail=False)
+    def done_export_file(self, request):
+        serializer = TestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = AsyncResult(serializer.validated_data['id'], app=celery_app)
+
+        if result.ready():
+            try:
+                return Response({'result': result.result})
+            except TypeError:
+                return Response({'result': str(result.result)})
         else:
             return Response({'result': "in processing"})

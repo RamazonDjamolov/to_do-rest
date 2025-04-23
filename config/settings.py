@@ -118,6 +118,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'static'
+
+# setting file
+
+
+MEDIA_URL = 'media/'
+
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -186,6 +194,6 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 
 CELERY_TASK_TRACK_STARTED = True
 
-CELERY_TASK_TIME_LIMIT = 1800  # tasklarimizi bajarilish limiti 
+CELERY_TASK_TIME_LIMIT = 1800  # tasklarimizi bajarilish limiti
 
 CELERY_TIMEZONE = 'Asia/Tashkent'
