@@ -15,6 +15,7 @@ def import_export_file(project_list):
     os.makedirs(os.path.join(settings.MEDIA_ROOT, 'exported'), exist_ok=True)
     path = os.path.join(settings.MEDIA_ROOT, "exported/project_list.xlsx")
     df = pd.DataFrame(project_list)
+    # pasta vaqtga nisbatan type bosa iwlatadi
     for col in df.select_dtypes(include=['datetimetz']).columns:
         df[col] = df[col].dt.tz_localize(None)
 
