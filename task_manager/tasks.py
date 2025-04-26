@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from celery import shared_task
 import pandas as pd
 import os
@@ -22,3 +24,7 @@ def import_export_file(project_list):
     df.to_excel(path, index=False)
 
     return path
+
+@shared_task
+def print_time_now():
+    print(f"{datetime.now() } hozirgi vaqt")
