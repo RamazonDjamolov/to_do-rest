@@ -53,7 +53,13 @@ class TaskListSerializer(serializers.ModelSerializer):
 class CreateTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
-        fields = ['title', 'status', 'assign_to']
+        fields = ['id','title', 'status', 'assign_to', 'project']
+
+        extra_kwargs = {
+            'id': {'read_only': True}
+        }
+
+
 
 
 class ChoiceSerializer(serializers.Serializer):
